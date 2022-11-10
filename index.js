@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
 
 
@@ -18,6 +18,7 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 async function run () {
     try{
         const serviceCollection = client.db('getjustice').collection('services');
+        const reviewCollection = client.db('getjustice').collection('review');
 
         //display 3 services
         app.get('/limitedservice', async(req, res) => {
@@ -25,7 +26,7 @@ async function run () {
             const cursor = serviceCollection.find(query)
             const services = await cursor.limit(3).toArray();
             res.send(services)
-        })
+        });
 
         //display all service data
         app.get('/allservices', async(req, res) => {
@@ -33,7 +34,30 @@ async function run () {
             const cursor = serviceCollection.find(query)
             const services = await cursor.toArray();
             res.send(services)
+        });
+
+        //load service data by id
+        app.get('/services/:id', async(req, res) => {
+            const id = req.params.id;
+            const query = {_id: ObjectId(id)};
+            const selectedService = await serviceCollection.findOne(query);
+            res.send(selectedService);
         })
+
+        //post review data
+        app.post('/review', async(req, res) => {
+            const review = req.body;
+            const result = await reviewCollection.insertOne(review);
+            res.send(result);
+        });
+
+        //get review data
+        app.get('/review', async(req, res) => {
+            const query = {};
+            const cursor = reviewCollection.find(query)
+            const review = await cursor.toArray();
+            res.send(review)
+        });
     }
     finally{
 
