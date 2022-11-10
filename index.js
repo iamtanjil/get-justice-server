@@ -19,6 +19,7 @@ async function run () {
     try{
         const serviceCollection = client.db('getjustice').collection('services');
         const reviewCollection = client.db('getjustice').collection('review');
+        const addedServiceCollection = client.db('getjustice').collection('addedService');
 
         //display 3 services
         app.get('/limitedservice', async(req, res) => {
@@ -57,6 +58,35 @@ async function run () {
             const cursor = reviewCollection.find(query)
             const review = await cursor.toArray();
             res.send(review)
+        });
+
+        //get review data by query
+        app.get('/myreview', async (req, res) => {
+            let query = {};
+
+            if (req.query.email) {
+                query = {
+                    email: req.query.email
+                }
+            }
+            const cursor = reviewCollection.find(query);
+            const review = await cursor.toArray();
+            res.send(review);
+        });
+
+        //delete review
+        app.delete('/review/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await reviewCollection.deleteOne(query);
+            res.send(result);
+        })
+
+        //post addedService Data
+        app.post('/addedservice', async (req, res) => {
+            const order = req.body;
+            const result = await addedServiceCollection.insertOne(order);
+            res.send(result);
         });
     }
     finally{
