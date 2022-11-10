@@ -88,6 +88,14 @@ async function run () {
             const result = await addedServiceCollection.insertOne(order);
             res.send(result);
         });
+
+        //get added service data
+        app.get('/addedservice', async(req, res) => {
+            const query = {};
+            const cursor = addedServiceCollection.find(query)
+            const addedService = await cursor.toArray();
+            res.send(addedService)
+        });
     }
     finally{
 
